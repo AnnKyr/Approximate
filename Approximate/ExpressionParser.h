@@ -7,28 +7,31 @@ std::string input_processed;
 
 class expression_tree
 {
+	struct operation;
+
 	struct op_type_base 
 	{
-		template <typename ...T>
-		double execute(T...args) = 0;
+		virtual double execute(operation* ...args) = 0;
 	};
 
 	struct op_type_sum : op_type_base 
 	{
-		template <typename ...T>
-		double execute(T...args) override;
+		double execute(operation* ...args) override;
 	};
 
 	struct op_type_prod : op_type_base
 	{
-		template <typename ...T>
-		double execute(T...args) override;
+		double execute(operation* ...args) override;
 	};
 
 	struct op_type_trig : op_type_base 
 	{
-		template <>
+		virtual double execute(operation* arg) override;
+	};
 
+	struct op_type_sin : op_type_trig
+	{
+		double execute(operation* arg) override;
 	};
 
 	struct operation
