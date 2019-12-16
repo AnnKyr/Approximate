@@ -5,52 +5,46 @@
 
 std::string input_processed;
 
+enum class op_type
+{
+	param, sum, prod, pow, sin, cos, tan, cot, log, ln
+};
+
 class expression_tree
 {
-	struct operation;
-
-	struct op_type_base 
-	{
-		virtual double execute(operation* ...args) = 0;
-	};
-
-	struct op_type_sum : op_type_base 
-	{
-		double execute(operation* ...args) override;
-	};
-
-	struct op_type_prod : op_type_base
-	{
-		double execute(operation* ...args) override;
-	};
-
-	struct op_type_trig : op_type_base 
-	{
-		virtual double execute(operation* arg) override;
-	};
-
-	struct op_type_sin : op_type_trig
-	{
-		double execute(operation* arg) override;
-	};
-
+	
 	struct operation
 	{
 		std::vector<operation*> operands;
 		//op_type op;
+		double (*func) (const std::vector<operation*>&);
 		double get();
 		void add(operation*);
 	};
+
+	typedef double FUNC (const std::vector<operation*>&);
+
+	static double param (const std::vector<operation*>&);
+	static double sum   (const std::vector<operation*>&);
+	static double prod  (const std::vector<operation*>&);
+	static double pow   (const std::vector<operation*>&);
+	static double sin   (const std::vector<operation*>&);
+	static double cos   (const std::vector<operation*>&);
+	static double tan   (const std::vector<operation*>&);
+	static double cot   (const std::vector<operation*>&);
+	static double log   (const std::vector<operation*>&);
+	static double ln    (const std::vector<operation*>&);
 
 public:
 	expression_tree(std::string input);
 	double calculate(double);
 private:
-	operation* parse_subexpr(int a);
-	std::string parse_token(int& a);
+	operation* parse_subexpr(int a, int b);
+	void preprocess(std::string& token);
+	std::string parse_token(const std::string& str, int& a);
 	bool is_terminator(char);
-	double param_value;
+	static double param_value;
 	std::string expression;
 	operation* root;
-	
+	static FUNC* operations[10];
 };
