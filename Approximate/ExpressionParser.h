@@ -1,4 +1,5 @@
 #pragma once
+#define OUT
 #include <vector>
 #include <string>
 
@@ -16,8 +17,7 @@ class expression_tree
 	struct operation
 	{
 		std::vector<operation*> operands;
-		//op_type op;
-		double (*func) (const std::vector<operation*>&);
+		double (*func) (const std::vector<operation*>&) = nullptr;
 		double get();
 		void add(operation*);
 	};
@@ -39,10 +39,12 @@ public:
 	expression_tree(std::string input);
 	double calculate(double);
 private:
-	operation* parse_subexpr(int a, int b);
+	char param_name;
+	operation* parse_subexpr(std::string token);
 	void preprocess(std::string& token);
 	std::string parse_token(const std::string& str, int& a);
 	bool is_terminator(char);
+	void parse_func(std::string token, OUT operation*);
 	static double param_value;
 	std::string expression;
 	operation* root;
