@@ -21,6 +21,9 @@
     <ClInclude Include="ExpressionParser.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Differentiate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExpressionParser.cpp">

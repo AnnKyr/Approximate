@@ -2,13 +2,14 @@
 #define OUT
 #include <vector>
 #include <string>
+#include <functional>
 
 
 std::string input_processed;
 
 enum class op_type
 {
-	param, sum, prod, pow, sin, cos, tan, cot, log, ln
+	param, sum, prod, pow, sin, cos, tan, cot, log, lgn, num
 };
 
 class expression_tree
@@ -17,12 +18,10 @@ class expression_tree
 	struct operation
 	{
 		std::vector<operation*> operands;
-		double (*func) (const std::vector<operation*>&) = nullptr;
+		std::function<double(const std::vector<operation*>&)> func;
 		double get();
 		void add(operation*);
 	};
-
-	typedef double FUNC (const std::vector<operation*>&);
 
 	static double param (const std::vector<operation*>&);
 	static double sum   (const std::vector<operation*>&);
@@ -33,7 +32,7 @@ class expression_tree
 	static double tan   (const std::vector<operation*>&);
 	static double cot   (const std::vector<operation*>&);
 	static double log   (const std::vector<operation*>&);
-	static double ln    (const std::vector<operation*>&);
+	static double lgn   (const std::vector<operation*>&);
 
 public:
 	expression_tree(std::string input);
@@ -44,9 +43,10 @@ private:
 	void preprocess(std::string& token);
 	std::string parse_token(const std::string& str, int& a);
 	bool is_terminator(char);
-	void parse_func(std::string token, OUT operation*);
+	void parse_func(std::string token, OUT operation* o);
 	static double param_value;
 	std::string expression;
 	operation* root;
-	static FUNC* operations[10];
+	static std::function<double(const std::vector<operation*>&)> operations[10];
+	op_type get_func_type(const std::string& token);
 };

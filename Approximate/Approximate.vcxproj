@@ -138,6 +138,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Differentiate.h" />
     <ClInclude Include="ExpressionParser.h" />
     <ClInclude Include="integration.h" />
   </ItemGroup>

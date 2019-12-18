@@ -2,12 +2,27 @@
 #include <stack>
 #include <cmath>
 
-expression_tree::FUNC* expression_tree::operations[10] { param, sum, prod, pow, sin, cos, tan, cot, log, lgn };
+std::function<double(const std::vector<expression_tree::operation*>&)> expression_tree::operations[10] 
+{ 
+	param, sum, prod, pow, sin, cos, tan, cot, log, lgn 
+};
+
 double expression_tree::param_value;
+
+expression_tree::expression_tree(std::string input)
+{
+	root = parse_subexpr(input);
+}
+
+double expression_tree::calculate(double x)
+{
+	expression_tree::param_value = x;
+	return root->get();
+}
 
 expression_tree::operation* expression_tree::parse_subexpr(std::string token)
 {
-	operation* p = new operation();
+	expression_tree::operation* p = new expression_tree::operation();
 	bool found = 0;
 	preprocess(token);
 	int i = token.size() - 1, j = i - 1;
@@ -25,11 +40,11 @@ expression_tree::operation* expression_tree::parse_subexpr(std::string token)
 	if (found)
 	{
 		p->add(parse_subexpr(token.substr(j + 1, i - j)));
-		p->func = operations[op_type::sum];
+		p->func = expression_tree::operations[static_cast<int>(op_type::sum)];
 		return p;
 	} 
 
-	bool found = 0;
+	found = 0;
 	i = token.size() - 1, j = i - 1;
 
 	while (j >= 0)
@@ -46,9 +61,10 @@ expression_tree::operation* expression_tree::parse_subexpr(std::string token)
 	if (found)
 	{
 		p->add(parse_subexpr(token.substr(j + 1, i - j)));
-		p->func = operations[op_type::prod];
+		p->func = expression_tree::operations[static_cast<int>(op_type::prod)];
 		return p;
 	}
+
 
 	parse_func(token, p);
 	return p;
@@ -143,78 +159,109 @@ bool expression_tree::is_terminator(char c)
 
 void expression_tree::parse_func(std::string token, OUT operation* o)
 {
-	if (token.size()==1 && token[0] == param_name) 
+	if (token.size() == 1 && token[0] == param_name)
 	{
-		o->func = operations[op_type::param];
+		o->func = expression_tree::operations[static_cast<int>(op_type::param)];
 		return;
 	}
 
-	if (token.size() < 6)
+	op_type type = get_func_type(token.substr(0, 3));
+
+	if (token.size() < 6 || type == op_type::num)
 	{
 		double a = std::stod(token);
-		o->func = &[=](const std::vector<operation*>&) { return a; };
+		o->func = [a](const std::vector<expression_tree::operation*>&) { return a; };
 		return;
-		
 	}
-	//TODO func capture
+
+	o->func = expression_tree::operations[static_cast<int>(type)];
+
+	int i = token.size() - 2;
+	int j = i - 1;
+
+	while (j >= 4)
+	{
+		if (token[j] == ',')
+		{
+			o->add(parse_subexpr(token.substr(j + 1, i - j)));
+			i = j - 1;
+			j = i;
+		}
+		parse_token(token, j);
+	}
+
+	o->add(parse_subexpr(token.substr(j + 1, i - j)));
+
 }
 
-double expression_tree::param(const std::vector<operation*>&)
+op_type expression_tree::get_func_type(const std::string& token)
+{
+	if (token == "pow")	return op_type::pow;
+	if (token == "sin")	return op_type::sin;
+	if (token == "cos")	return op_type::cos;
+	if (token == "tan")	return op_type::tan;
+	if (token == "cot")	return op_type::cot;
+	if (token == "log")	return op_type::log;
+	if (token == "lgn")	return op_type::lgn;
+	return op_type::num;
+}
+
+double expression_tree::param(const std::vector<expression_tree::operation*>&)
 {
 	return param_value;
 }
 
-double expression_tree::sum(const std::vector<operation*>& n)
+double expression_tree::sum(const std::vector<expression_tree::operation*>& n)
 {
 	double result = 0;
 	for (auto&& t : n) result += t->get();
 	return result;
 }
 
-double expression_tree::prod(const std::vector<operation*>& n)
+double expression_tree::prod(const std::vector<expression_tree::operation*>& n)
 {
 	double result = 0;
 	for (auto&& t : n) result *= t->get();
 	return result;
 }
 
-double expression_tree::pow(const std::vector<operation*>& n)
+double expression_tree::pow(const std::vector<expression_tree::operation*>& n)
 {
 	if (n.size() != 2) throw;
 	return std::pow(n[0]->get(), n[1]->get());
 }
 
-double expression_tree::sin(const std::vector<operation*>& n)
+double expression_tree::sin(const std::vector<expression_tree::operation*>& n)
 {
 	if (n.size() != 1) throw;
 	return std::sin(n[0]->get());
 }
 
-double expression_tree::cos(const std::vector<operation*>& n)
+double expression_tree::cos(const std::vector<expression_tree::operation*>& n)
 {
 	if (n.size() != 1) throw;
 	return std::cos(n[0]->get());
 }
 
-double expression_tree::tan(const std::vector<operation*>& n)
+double expression_tree::tan(const std::vector<expression_tree::operation*>& n)
 {
 	if (n.size() != 1) throw;
 	return std::tan(n[0]->get());
 }
 
-double expression_tree::cot(const std::vector<operation*>& n)
+double expression_tree::cot(const std::vector<expression_tree::operation*>& n)
 {
 	if (n.size() != 1) throw;
 	return 1 / std::tan(n[0]->get());
 }
 
-double expression_tree::log(const std::vector<operation*>& n)
+double expression_tree::log(const std::vector<expression_tree::operation*>& n)
 {
 	if (n.size() != 2) throw;
 	return std::log(n[0]->get()) / std::log(n[1]->get());
 }
 
-double expression_tree::lgn(const std::vector<operation*>& n)
+double expression_tree::lgn(const std::vector<expression_tree::operation*>& n)
 {
 	if (n.size() != 1) throw;
 	return std::log(n[0]->get());
@@ -225,7 +272,7 @@ double expression_tree::operation::get()
 	return func(operands);
 }
 
-void expression_tree::operation::add(operation* o)
+void expression_tree::operation::add(expression_tree::operation* o)
 {
 	operands.push_back(o);
 }
