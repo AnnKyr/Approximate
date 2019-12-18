@@ -140,7 +140,7 @@
   <ItemGroup>
     <ClInclude Include="Differentiate.h" />
     <ClInclude Include="ExpressionParser.h" />
-    <ClInclude Include="integration.h" />
+    <ClInclude Include="Integration.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ExpressionParser.cpp" />

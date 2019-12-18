@@ -4,12 +4,9 @@
 #include <string>
 #include <functional>
 
-
-std::string input_processed;
-
 enum class op_type
 {
-	param, sum, prod, pow, sin, cos, tan, cot, log, lgn, num
+	param, sum, dif, prod, div, pow, sin, cos, tan, cot, log, lgn, num
 };
 
 class expression_tree
@@ -25,7 +22,9 @@ class expression_tree
 
 	static double param (const std::vector<operation*>&);
 	static double sum   (const std::vector<operation*>&);
+	static double dif   (const std::vector<operation*>&);
 	static double prod  (const std::vector<operation*>&);
+	static double div   (const std::vector<operation*>&);
 	static double pow   (const std::vector<operation*>&);
 	static double sin   (const std::vector<operation*>&);
 	static double cos   (const std::vector<operation*>&);
@@ -33,9 +32,10 @@ class expression_tree
 	static double cot   (const std::vector<operation*>&);
 	static double log   (const std::vector<operation*>&);
 	static double lgn   (const std::vector<operation*>&);
+	
 
 public:
-	expression_tree(std::string input);
+	expression_tree(std::string input, char param = 'x');
 	double calculate(double);
 private:
 	char param_name;
@@ -47,6 +47,6 @@ private:
 	static double param_value;
 	std::string expression;
 	operation* root;
-	static std::function<double(const std::vector<operation*>&)> operations[10];
+	static std::function<double(const std::vector<operation*>&)> operations[12];
 	op_type get_func_type(const std::string& token);
 };
