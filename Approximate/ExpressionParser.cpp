@@ -1,19 +1,24 @@
 #include "ExpressionParser.h"
 #include <stack>
 #include <cmath>
-
+////
 std::function<double(const expression_tree::operands&)> expression_tree::operations[12]
 { 
 	param, sum, dif, prod, div, pow, sin, cos, tan, cot, log, lgn 
 };
 
-double expression_tree::param_value;
+char expression_tree::st[12]
+{
+	'x', '+', '-', '*', '/', '^'
+};
 
+double expression_tree::param_value;
+//
 expression_tree::expression_tree(std::string input, char param) :param_name{ param }
 {
 	root = parse_subexpr(input);
 }
-
+//
 double expression_tree::calculate(double x)
 {
 	expression_tree::param_value = x;
@@ -22,7 +27,17 @@ double expression_tree::calculate(double x)
 
 expression_tree::operation* expression_tree::parse_subexpr(std::string token)
 {
-	expression_tree::operation* p = new expression_tree::operation();
+	if (token.front() == '(' && token.back() == ')')
+	{
+		token.pop_back();
+		token.erase(0, 1);
+	}
+
+	for (op_type i = op_type::sum; i != op_type::sin; i++)
+	{
+
+	}
+/*	expression_tree::operation* p = new expression_tree::operation();
 	bool found = 0;
 	preprocess(token);
 	int i = token.size() - 1, j = i ;
@@ -67,9 +82,9 @@ expression_tree::operation* expression_tree::parse_subexpr(std::string token)
 
 
 	parse_func(token, p);
-	return p;
+	return p;*/
 }
-
+// return(?)
 std::string expression_tree::parse_token(const std::string& str, int& a)
 {
 	std::string token;
@@ -99,10 +114,10 @@ std::string expression_tree::parse_token(const std::string& str, int& a)
 
 	return token;
 }
-
+//
 bool expression_tree::is_terminator(char c)
 {
-	return (c == '+' || c == '*' || c == '^' || c == ',');
+	return (c == '+' || c == '-' || c == '*' || c == '/' || c == '^' || c == ',');
 }
 
 void expression_tree::parse_func(std::string token, OUT operation* o)
@@ -141,7 +156,7 @@ void expression_tree::parse_func(std::string token, OUT operation* o)
 	o->add(parse_subexpr(token.substr(j + 1, i - j)));
 
 }
-
+//
 op_type expression_tree::get_func_type(const std::string& token)
 {
 	if (token == "pow")	return op_type::pow;
@@ -153,88 +168,77 @@ op_type expression_tree::get_func_type(const std::string& token)
 	if (token == "lgn")	return op_type::lgn;
 	return op_type::num;
 }
-
+//
 double expression_tree::param(const operands&)
 {
 	return param_value;
 }
-
+//
 double expression_tree::sum(const operands& n)
 {
-	double result = 0;
-	for (auto&& t : n) result += t->get();
-	return result;
-}
 
+	return n.first->get() + n.second->get();
+}
+//
 double expression_tree::dif(const operands& n)
 {
-	double result = 0;
-	for (auto&& t : n) result -= t->get();
-	return result;
+	return n.first->get() - n.second->get();
 }
-
+//
 double expression_tree::prod(const operands& n)
 {
-	double result = 0;
-	for (auto&& t : n) result *= t->get();
-	return result;
+	return n.first->get() * n.second->get();
 }
-
+//
 double expression_tree::div(const operands& n)
 {
-	double result = 0;
-	for (auto&& t : n) result /= t->get();
-	return result;
+	return n.first->get() / n.second->get();
 }
-
+//
 double expression_tree::pow(const operands& n)
 {
-	if (n.size() != 2) throw;
-	return std::pow(n[0]->get(), n[1]->get());
+	return std::pow(n.first->get(), n.second->get());
 }
-
+//
 double expression_tree::sin(const operands& n)
 {
-	if (n.size() != 1) throw;
-	return std::sin(n[0]->get());
+	return std::sin(n.first->get());
 }
-
+//
 double expression_tree::cos(const operands& n)
 {
-	if (n.size() != 1) throw;
-	return std::cos(n[0]->get());
+	return std::cos(n.first->get());
 }
-
+//
 double expression_tree::tan(const operands& n)
 {
-	if (n.size() != 1) throw;
-	return std::tan(n[0]->get());
+	return std::tan(n.first->get());
 }
-
+//
 double expression_tree::cot(const operands& n)
 {
-	if (n.size() != 1) throw;
-	return 1 / std::tan(n[0]->get());
+	return 1 / std::tan(n.first->get());
 }
-
+//
 double expression_tree::log(const operands& n)
 {
-	if (n.size() != 2) throw;
-	return std::log(n[0]->get()) / std::log(n[1]->get());
+	return std::log(n.first->get()) / std::log(n.second->get());
 }
-
+//
 double expression_tree::lgn(const operands& n)
 {
-	if (n.size() != 1) throw;
-	return std::log(n[0]->get());
+	return std::log(n.first->get());
 }
-
+//
 double expression_tree::operation::get()
 {
-	return func(operands);
+	return func(operands());
 }
-
-void expression_tree::operation::add(expression_tree::operation* o)
+//
+void expression_tree::operation::add(operation* o)
 {
-	operands.push_back(o);
+	if (!op.first)
+		op.first = o;
+	else
+		op.second = o;
 }
