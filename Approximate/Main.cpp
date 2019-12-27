@@ -12,5 +12,5 @@ int main()
 	//std::cin >> str;
 	expression_tree* tree = new expression_tree(str, 'x');
 	std::cout << tree->calculate(1) << "\n";
-	//	std::cout << calculate(0, 1, str);
+	std::cout << calculate(0, 1, str);
 }
